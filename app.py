@@ -9,8 +9,7 @@ from src.tools.llm_factory import create_llm_agent  # Import the factory functio
 from config import use_open_source_generation
 import logging
 import logging.config
-from src.view.new_view import merge_dash_admin as mer
-
+from src.view.new_view import merge_dash_admin as view_admin
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
@@ -27,10 +26,9 @@ client_db = chromadb.PersistentClient("database_test/")
 
 logging.config.fileConfig('logging_config.ini')
 
-#logging.basicConfig(filename="avg_time.log" , level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 chat = Chatbot(client_db=client_db, llm_agent=llm_agent, retriever=Retriever(llmagent=llm_agent))
 
-ilumio_qna = mer.run(ctrl=chat, config=view_config)
-ilumio_qna.queue().launch()
+ilumio_qna_admin = view_admin.run(ctrl=chat, config=view_config)
 
+ilumio_qna_admin.queue().launch()

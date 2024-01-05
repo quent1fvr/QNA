@@ -11,6 +11,7 @@ theme = gr.themes.Soft(
     secondary_hue="blue",
     neutral_hue="stone",
 )
+css = """.margin-top-row {margin-top: 1000px}"""
 def run(ctrl: Chatbot, config: {}):
     callback_positive = gr.CSVLogger()
     callback_negative = gr.CSVLogger()
@@ -18,20 +19,30 @@ def run(ctrl: Chatbot, config: {}):
     callback_manual2= gr.CSVLogger()
 
 
-    with gr.Blocks(theme=theme) as qna:
+    with gr.Blocks(theme=theme, css=css) as qna:
         with gr.Row():
-            with gr.Column(scale=0):
-                collections_list = gr.Radio(
+            with gr.Column(scale=2, elem_id="margin-top-row"):
+                collections_listB = gr.Dropdown(
+                    choices=[a.name for a in ctrl.client_db.list_collections()],
+                    label="Current collections in the database",
+                    value=ctrl.client_db.list_collections()[0].name if ctrl.client_db.list_collections() else None,
+                    visible=False,
+                    info="Choose a collection to query.",
+                    elem_classes="margin-top-row",
+                )                    
+                
+                collections_list = gr.Dropdown(
                     choices=[a.name for a in ctrl.client_db.list_collections()],
                     label="Current collections in the database",
                     value=ctrl.client_db.list_collections()[0].name if ctrl.client_db.list_collections() else None,
                     visible=True,
-                    info="Choose a collection to query."
+                    info="Choose a collection to query.",
+                    elem_classes="margin-top-row",
                 )
                 positive_button = gr.Button("👍")
                 negative_button = gr.Button("👎")
                 feedback_input = gr.Textbox(interactive=True, label=" Manual Feedback")             
-            with gr.Column(scale=10):
+            with gr.Column(scale=6):
                  
                 gr.Markdown(config['title'])
                 intro_text = gr.Markdown(" Ask questions on any PDF, Word or HTML document.", visible=True)
