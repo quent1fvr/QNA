@@ -1,7 +1,6 @@
 from pyquery import PyQuery as pq
 from src.model.paragraph import Paragraph
 from bs4 import BeautifulSoup
-from src.tools.readers_pdf import Reader_illumio
 from src.tools.table_converter import table_converter
 
 class Reader_HTML:

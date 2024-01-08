@@ -10,10 +10,7 @@ import re
 import plotly.express as px
 import plotly.graph_objects as go
 import tempfile
-
-import numpy as np
 import pandas as pd
-from io import BytesIO
 
 theme = gr.themes.Soft(
     primary_hue="orange",
@@ -171,7 +168,7 @@ def parse_log_entry(entry):
 
 
     # Read the log file and parse entries
-with open('generated_log.log', 'r') as file:
+with open('src/Logs/generated_log.log', 'r') as file:
     logs = [parse_log_entry(line) for line in file if parse_log_entry(line)]
 
     # Create a DataFrame
@@ -185,7 +182,7 @@ def is_valid_log_entry(log_entry):
 
 
 # Read the log file and parse each line
-with open('generated_log.log', 'r') as file:
+with open('src/Logs/generated_log.log', 'r') as file:
     parsed_logs_history = [parse_log_entry_history(line) for line in file if is_valid_log_entry(parse_log_entry_history(line))]
 
 # Filter out None values
@@ -198,7 +195,7 @@ df_logs_history.head()
 
 
 
-with open('generated_log.log', 'r') as file:
+with open('src/Logs/generated_log.log', 'r') as file:
     parsed_feedback = [parse_feedback_log_entry(line) for line in file if 'Feedback' in line]
 
 # Filter out None values

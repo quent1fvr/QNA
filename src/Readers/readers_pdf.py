@@ -1,24 +1,18 @@
 import json
 import PyPDF2
 # To analyze the PDF layout and extract text
-from pdfminer.high_level import extract_pages, extract_text
-from pdfminer.layout import LTTextContainer, LTChar, LTRect, LTFigure
+from pdfminer.high_level import extract_pages
+from pdfminer.layout import LTTextContainer, LTChar, LTFigure
 # To extract text from tables in PDF
 import pdfplumber
-# To extract the images from the PDFs
 from PIL import Image
 from pdf2image import convert_from_path
-# To perform OCR to extract text from images 
 import pytesseract 
-# To remove the additional created files
 import os
-import pdfplumber as pdfp
-
 from src.model.paragraph import Paragraph
 from src.tools.table_converter import table_converter
 from src.tools.reader_pdf_tools import *
 import gradio as gr
-import statistics
 
 def get_style_of_line(size : float, fontname : str):
     if fontname == "XFQKGD+Consolas":

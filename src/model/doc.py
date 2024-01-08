@@ -1,8 +1,8 @@
 from src.model.container import Container
 from src.tools.index_creation import set_indexes
-from src.tools.reader_word import WordReader
-from src.tools.readers_pdf import Reader, Reader_illumio
-from src.tools.reader_html import Reader_HTML
+from src.Readers.reader_word import WordReader
+from src.Readers.readers_pdf import Reader, Reader_illumio
+from src.Readers.reader_html import Reader_HTML
 from src.model.paragraph import Paragraph
 
 

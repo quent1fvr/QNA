@@ -1,10 +1,5 @@
 import docx
 import os
-# sys.path.append('path to app')
-# import docx
-# import os
-# import sys
-
 from src.model.paragraph import Paragraph
 
 class WordReader:

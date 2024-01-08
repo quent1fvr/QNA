@@ -89,7 +89,8 @@ instance/
 
 # Scrapy stuff:
 .scrapy
-
+ilumenv
+llama.cpp
 # Sphinx documentation
 docs/_build/
 

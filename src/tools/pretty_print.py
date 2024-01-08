@@ -1,5 +1,3 @@
-from src.model.paragraph import Paragraph
-from src.model.container import Container
 
 
 #function that pretty prints the paragraphs

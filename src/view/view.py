@@ -1,7 +1,5 @@
 import gradio as gr
 from src.control.control import Chatbot
-from chromadb.utils import embedding_functions
-import os
 from src.tools.embedding_factory import create_embedding_model
 from config import use_open_source_embeddings
 

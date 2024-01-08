@@ -4,7 +4,7 @@ from langchain.llms import LlamaCpp
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from src.control.control import Chatbot
-from src.tools.llm_opensource import LlmAgentOS
+from Chatbot_llama2_questions.src.Lllm.llm_opensource import LlmAgentOS
 from src.tools.retriever import Retriever
 from src.tools.embedding_factory import create_embedding_model
 import chromadb

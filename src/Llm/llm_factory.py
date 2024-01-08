@@ -1,6 +1,3 @@
-# llm_factory.py
-#from src.tools.llm_opensource_mistral import LlmAgentOSMistral
-
 
 def create_llm_agent(use_open_source: bool):
     """
@@ -10,12 +7,12 @@ def create_llm_agent(use_open_source: bool):
     :return: Instance of either LlmAgentOS or LlmAgent.
     """
     if use_open_source:
-        from src.tools.llm_opensource import LlmAgentOS
+        from src.Llm.llm_opensource import LlmAgentOS
         from config import llm_opensource
 
         return LlmAgentOS(llm_model=llm_opensource)  # Instantiate the open-source agent
     
     else:
-        from src.tools.llm import LlmAgent
+        from src.Llm.llm import LlmAgent
         from config import llm_openai
         return LlmAgent(llm_model=llm_openai)    # Instantiate the proprietary agent
