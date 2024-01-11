@@ -324,57 +324,7 @@ class Reader:
 
 
 
-    # def pdf_manager(self, pdf_path, actual_first_page=0, include_images=True):
-    #     mean_size, std_dev = self.analyze_font_sizes(pdf_path)
-    #     print(f"Debug: Mean font size: {mean_size}, Standard deviation: {std_dev}")
-
-    #     paragraphs = []
-
-    #     with pdfplumber.open(pdf_path) as pdf:
-    #         number_of_pages = len(pdf.pages)
-    #         actual_first_page = max(0, min(int(actual_first_page), number_of_pages - 1))  # Ensure actual_first_page is an integer
-    #         page_numbers = range(actual_first_page, number_of_pages)
-
-    #         for pagenum in page_numbers:
-    #             page = pdf.pages[pagenum]
-    #             tables = page.find_tables()
-
-    #             # Extracting text
-    #             if page.extract_text():
-    #                 for element in page.layout:
-    #                     if isinstance(element, LTTextContainer):
-    #                         line_text, format_per_line = self.text_extraction(element)
-    #                         print(f"Debug: Extracted text: {line_text}, Formats: {format_per_line}")
-                            
-    #                         # Create a paragraph for each line of text
-    #                         for line in line_text.split('\n'):
-    #                             font_style = self.get_style_of_line(format_per_line, element.fontname, mean_size, std_dev)
-    #                             paragraph = Paragraph(text=line, font_style=font_style, id_=pagenum, page_id=pagenum)
-    #                             paragraphs.append(paragraph)
-
-    #                     # Processing images
-    #                     if include_images and isinstance(element, LTFigure):
-    #                         self.crop_image(element, page)
-    #                         self.convert_to_images('cropped_image.pdf')
-    #                         image_text = self.image_to_text('PDF_image.png')
-    #                         paragraph = Paragraph(text=image_text, font_style="image", id_=pagenum, page_id=pagenum)
-    #                         paragraphs.append(paragraph)
-
-    #             # Processing tables
-    #             if tables:
-    #                 for table_num, _ in enumerate(tables):
-    #                     table_string = self.extract_table(pdf_path, pagenum, table_num)
-    #                     paragraph = Paragraph(text=table_string, font_style="table", id_=pagenum, page_id=pagenum)
-    #                     paragraphs.append(paragraph)
-
-    #     # Cleanup for image processing
-    #     if include_images:
-    #         os.remove('cropped_image.pdf')
-    #         os.remove('PDF_image.png')
-
-    #     paragraphs = self.rearrange_paragraphs(paragraphs)
-    #     print(paragraphs)
-    #     return paragraphs
+ 
     
     
     def concatenate_paragraphs(self, paragraphs, doc_title):

@@ -4,7 +4,7 @@ from langchain.llms import LlamaCpp
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from src.control.control import Chatbot
-from Chatbot_llama2_questions.src.Lllm.llm_opensource import LlmAgentOS
+from src.Llm.llm_opensource import LlmAgentOS
 from src.tools.retriever import Retriever
 from src.tools.embedding_factory import create_embedding_model
 import chromadb
@@ -31,7 +31,7 @@ class ChatbotProcessor:
         self.model_config = model_config
         self.client_db = client_db
         self.chatbot = self.initialize_chatbot()
-
+        
     def initialize_chatbot(self):
         """
         Initializes the chatbot with a language model and a retriever.
@@ -43,6 +43,7 @@ class ChatbotProcessor:
         collection = self.client_db.get_collection(name="Le_Petit_Prince_pdf", embedding_function=embedding_model)
         llm_model = LlamaCpp(**self.model_config)
         return Chatbot(llm_agent=LlmAgentOS(llm_model), retriever=Retriever(llmagent=LlmAgentOS(llm_model), collection=collection), client_db=self.client_db)
+
 
     def process_queries(self, input_excel_file, output_excel_file):
         """

@@ -1,5 +1,4 @@
 import openai
-
 class LlmAgent:
 
     def __init__(self, llm_model: str):

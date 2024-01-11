@@ -12,6 +12,8 @@ import plotly.graph_objects as go
 import tempfile
 import pandas as pd
 
+########## LEGACY -----> refer to admin_view.py ##########
+
 theme = gr.themes.Soft(
     primary_hue="orange",
     secondary_hue="blue",
@@ -388,7 +390,6 @@ def generate_plots():
 fig1,fig2, fig3, fig4, fig5 , fig7,fig8,fig9  = generate_plots()
 
 def plot_feedback_type_distribution(df_logs):
-    import plotly.express as px
 
     # Assuming 'Activity' column contains feedback type information
     feedback_type_counts = df_logs['Activity'].value_counts().reset_index()

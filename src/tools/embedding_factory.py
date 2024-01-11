@@ -1,6 +1,5 @@
 import os
 from chromadb.utils import embedding_functions
-from sentence_transformers import SentenceTransformer
 
 def create_embedding_model(use_open_source_embeddings: bool):
     """

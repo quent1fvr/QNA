@@ -1,8 +1,6 @@
 import os
-import chromadb
 from src.tools.retriever import Retriever
 from src.Llm.llm import LlmAgent
-from src.Llm.llm_opensource import LlmAgentOS
 from src.model.block import Block
 from src.model.doc import Doc
 import gradio as gr
