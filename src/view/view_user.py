@@ -38,8 +38,8 @@ def run(ctrl: Chatbot, config: {}):
                     info="Choose a collection to query.",
                     elem_classes="margin-top-row",
                 )
-                positive_button = gr.Button("👍")
-                negative_button = gr.Button("👎")
+                positive_button = gr.Button("👍", visible=False)
+                negative_button = gr.Button("👎", visible=False)
                 feedback_input = gr.Textbox(interactive=True, label=" Manual Feedback")             
             with gr.Column(scale=6):
                  
@@ -244,14 +244,14 @@ def run(ctrl: Chatbot, config: {}):
         callback_manual.setup([input_text_comp, histo_text_comp, feedback_input], "Manual Feedback")
 
         positive_button.click(
-            lambda: logging.info("Positive", extra={'category': 'Thumb Feedback', 'elapsed_time': 0} ),
+            lambda: logging.info("Positive", extra={'category': 'Thumb Feedback', 'elapsed_time': 0, 'query': input_text_comp, 'histo': histo_text_comp} ),
             inputs=[],            
 
 
         )
 
         negative_button.click(
-            lambda: logging.info("Negative", extra={'category': 'Thumb Feedback', 'elapsed_time': 0} ),
+            lambda: logging.info("Negative", extra={'category': 'Thumb Feedback', 'elapsed_time': 0, 'query': input_text_comp, 'histo': histo_text_comp} ),
             inputs=[]
 
 )

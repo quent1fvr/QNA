@@ -71,7 +71,6 @@ class WordReader:
         for idx, paragraph in enumerate(doc_paragraphs):
             style = self.determine_style(paragraph)
 
-            # Assuming page_id is always 1 for simplicity, change as needed.
             p_obj = Paragraph(text=paragraph.text, font_style=style, id_=idx, page_id=1)
             paragraph_objects.append(p_obj)
             paragraphs = self.rearrange_paragraphs(paragraph_objects)

@@ -43,7 +43,6 @@ class Doc:
         return self.container.structure
 
     def get_blocks(self):
-
         def from_list_to_str(index_list):
             index_str = str(index_list[0])
             for el in index_list[1:]:
@@ -63,17 +62,3 @@ class Doc:
             return Paragraph(text=title,font_style='title0',id_=0,page_id=1)
         else:
             return Paragraph(text=title,font_style='h0',id_=0,page_id=1)
-"""
-    current_level = len(current_index)
-    if 0 < block.level:
-        if block.level == current_level:
-            current_index[-1] += 1
-        elif current_level < block.level:
-            current_index.append(1)
-        elif block.level < current_level:
-            current_index = current_index[:block.level]
-            current_index[-1] += 1
-        block.index = from_list_to_str(current_index)
-    else:
-        block.index = "0"
-"""

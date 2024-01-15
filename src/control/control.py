@@ -163,7 +163,6 @@ class Chatbot:
             return False
         return True
     
-    
 
     def list_models(self,model_dir):
         """
