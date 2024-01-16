@@ -1,4 +1,10 @@
-import openai
+from openai import OpenAI
+import os
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
+if "OPENAI_API_KEY" not in os.environ:
+    from config_key import OPENAI_API_KEY
+    os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
 class LlmAgent:
 
     def __init__(self, llm_model: str):
@@ -13,7 +19,7 @@ class LlmAgent:
                     f"You shall only provide the answer, nothing else before and after."
                     f"Here is the query you are given :\n"
                     f"``` {query} ```")
-        generation = openai.ChatCompletion.create(model=self.llm, messages=[{"role":"user","content":template}])
+        generation = client.chat.completions.create(model=self.llm, messages=[{"role":"user","content":template}])
         res = generation.choices[0].message.content
         print("****************")
         print(res)
@@ -26,7 +32,7 @@ class LlmAgent:
                     f"Your answer is based on the context delimited by triple backticks :\n ``` {context} ```\n"
                     f"You are consistent and avoid redundancies with the rest of the initial conversation delimited by triple backticks :\n ``` {histo} ```\n"
                     f"Your response shall be in {language} and shall be concise.")
-        generation = openai.ChatCompletion.create(model="gpt-3.5-turbo-16k", messages=[{"role":"system","content":context_for_the_ai},{"role":"user","content":query}])
+        generation = client.chat.completions.create(model="gpt-3.5-turbo-16k", messages=[{"role":"system","content":context_for_the_ai},{"role":"user","content":query}])
         res = generation.choices[0].message.content
         print("****************")
         print(res)
@@ -38,7 +44,7 @@ class LlmAgent:
         template = (f"Your task consists in translating in English the following text delimited by triple backticks: ``` {text} ```\n"
                     f"If the text is already in English, just return it !\n"
                     f"Your must not provide an answer to the text, just translate it.\n")
-        generation = openai.ChatCompletion.create(model=self.llm, messages=[{"role":"user","content":template}])
+        generation = client.chat.completions.create(model=self.llm, messages=[{"role":"user","content":template}])
         res = generation.choices[0].message.content
         print("****************")
         print(res)
@@ -48,7 +54,7 @@ class LlmAgent:
     def translate_v2(self, text: str) -> str:
         """translates"""
         task = "Translate in english the text. If it is already in english, just return the text."
-        generation = openai.ChatCompletion.create(model="gpt-4", messages=[{"role":"system","content":task},{"role":"user","content":text}])
+        generation = client.chat.completions.create(model="gpt-4", messages=[{"role":"system","content":task},{"role":"user","content":text}])
         res = generation.choices[0].message.content
         print("****************")
         print(res)
@@ -67,7 +73,7 @@ class LlmAgent:
                     f"Your response shall respect the following format:<response>\n"
                     f"Here is the answer you are given in {language}:"
                     f"{answer}")
-        generation = openai.ChatCompletion.create(model=self.llm, messages=[{"role":"user","content":template}])
+        generation = client.chat.completions.create(model=self.llm, messages=[{"role":"user","content":template}])
         res = generation.choices[0].message.content
         print("****************")
         print(res)
@@ -84,7 +90,7 @@ class LlmAgent:
                     f"If you see that the summary that you are creating will not respect ```{max_tokens}``` tokens, find a way to make it shorter."
                     f"The paragraph you need to summarize is the following :"
                     f"{prompt}")
-        generation = openai.ChatCompletion.create(model=self.llm, messages=[{"role":"user","content":template}])
+        generation = client.chat.completions.create(model=self.llm, messages=[{"role":"user","content":template}])
         res = generation.choices[0].message.content
         print("****************")
         print(res)
@@ -100,7 +106,7 @@ class LlmAgent:
                     f"Your response shall be concise and shall respect the following format:"
                     f"<summary>"
                     f"If you see that the summary that you are creating will not respect ```{max_tokens}``` tokens, find a way to make it shorter.")
-        generation = openai.ChatCompletion.create(model="gpt-3.5-turbo-16k", messages=[{"role":"system","content":task},{"role":"user","content":prompt}])
+        generation = client.chat.completions.create(model="gpt-3.5-turbo-16k", messages=[{"role":"system","content":task},{"role":"user","content":prompt}])
         res = generation.choices[0].message.content
         print("****************")
         print(res)
@@ -119,7 +125,7 @@ class LlmAgent:
         f"You should not answer to the questions, just create them. Moreover, you shall include the title of the paragraph in the questions."
         f"The paragraph you need to create questions about is the following :"
         f"{prompt}")
-        generation = openai.ChatCompletion.create(model=self.llm, messages=[{"role":"user","content":prompt_template}])
+        generation = client.chat.completions.create(model=self.llm, messages=[{"role":"user","content":prompt_template}])
         res = generation.choices[0].message.content
         print("****************")
         res = str(res).split("!=;")
@@ -135,7 +141,7 @@ class LlmAgent:
         template = (f"Your task consists in detecting the language of the last question or sentence of the text."
                     f"You should only give the two letters code of the language detected, nothing else."
                     f"Here is the text you are given delimited by triple backticks : ```{text}```")
-        generation = openai.ChatCompletion.create(model=self.llm, messages=[{"role":"user","content":template}])
+        generation = client.chat.completions.create(model=self.llm, messages=[{"role":"user","content":template}])
         res = generation.choices[0].message.content
         return str(res).strip()
     
@@ -143,6 +149,6 @@ class LlmAgent:
         """detects the language"""
         task = (f"Your task consists in detecting the language of the last question or sentence of the text."
                 f"You should only give the two letters code of the language detected, nothing else.")
-        generation = openai.ChatCompletion.create(model=self.llm, messages=[{"role":"system","content":task},{"role":"user","content":text}])
+        generation = client.chat.completions.create(model=self.llm, messages=[{"role":"system","content":task},{"role":"user","content":text}])
         res = generation.choices[0].message.content
         return str(res).strip()

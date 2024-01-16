@@ -1,8 +1,8 @@
 import os
 import time
-import chromadb
 from config import *
 from chromadb.utils import embedding_functions
+import chromadb
 from src.control.control import Chatbot
 from src.tools.retriever import Retriever
 from src.Llm.llm_factory import create_llm_agent

@@ -38,19 +38,20 @@ llm_openai = "gpt-3.5-turbo"
 ######## OPEN SOURCE ########
 
 
-n_gpu_layers = 20
-n_batch = 256  
-callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-llm_opensource = LlamaCpp(
-    model_path="/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/model/opensource_models/llama-2-13b-chat.Q5_K_S.gguf",
-    n_gpu_layers=n_gpu_layers,
-    n_batch=n_batch,
-    f16_kv=True,  
-    callback_manager=callback_manager,
-    verbose=True,  
-    n_ctx=2200,
-    temperature=0,
-)
+# n_gpu_layers = 20
+# n_batch = 256  
+# callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+# llm_opensource = LlamaCpp(
+#     model_path="/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/model/opensource_models/llama-2-13b-chat.Q5_K_S.gguf",
+#     n_gpu_layers=n_gpu_layers,
+#     n_batch=n_batch,
+#     f16_kv=True,  
+#     callback_manager=callback_manager,
+#     verbose=True,  
+#     n_ctx=2200,
+#     temperature=0,
+# )
+
 # def load_model(model_name):
 #     model_path = os.path.join(model_dir, model_name)
 #     return LlamaCpp(
