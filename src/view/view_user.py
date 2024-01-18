@@ -10,15 +10,10 @@ theme = gr.themes.Soft(
     secondary_hue="blue",
     neutral_hue="stone",
 )
-css = """.margin-top-row {margin-top: 1000px}"""
 def run(ctrl: Chatbot, config: {}):
-    callback_positive = gr.CSVLogger()
-    callback_negative = gr.CSVLogger()
-    callback_manual= gr.CSVLogger()
-    callback_manual2= gr.CSVLogger()
 
 
-    with gr.Blocks(theme=theme, css=css) as qna:
+    with gr.Blocks(theme=theme) as qna:
         with gr.Row():
             with gr.Column(scale=2, elem_id="margin-top-row"):
                 collections_listB = gr.Dropdown(
@@ -144,6 +139,8 @@ def run(ctrl: Chatbot, config: {}):
                 histo_text_comp: gr.update(visible=True, value=histo_text_),
                 input_example_comp: gr.update(visible=False,),
                 intro_text: gr.update(visible=False),
+                positive_button: gr.update(visible=True),
+                negative_button: gr.update(visible=True)
 
             }
             for i in range(4):
@@ -151,15 +148,20 @@ def run(ctrl: Chatbot, config: {}):
             return update_
 
         def input_text_fn2(input_text_, histo_text_):
-            answer, sources = ctrl.get_response(query=input_text_, histo=histo_text_)
-            histo_text_[-1] = (input_text_, answer)
+            # Store the current query
+            current_query = input_text_
+            answer, sources = ctrl.get_response(query=current_query, histo=histo_text_)
+            
+            # Update the last entry in the history with the current query and the answer
+            histo_text_[-1] = (current_query, answer)
+
             update_ = {
                 histo_text_comp: gr.update(value=histo_text_),
                 input_text_comp: gr.update(value=''),
                 intro_text: gr.update(visible=False),
+                positive_button: gr.update(visible=True),
+                negative_button: gr.update(visible=True),
             }
-
-
             for i in range(min(len(sources), 3)):
                 s = sources[i]
                 if i != 0:
@@ -237,24 +239,40 @@ def run(ctrl: Chatbot, config: {}):
             # Return an empty string to clear the Textbox
             return ""
         
+        def get_sources_contents():
+            # Extract the visible sources' contents from the source_text_comp array
+            sources_contents = [source.value for source in source_text_comp]  
+            return sources_contents
 
-            
-        callback_positive.setup([input_text_comp, histo_text_comp], "Positive Feedbacks")
-        callback_negative.setup([input_text_comp, histo_text_comp], "Negative Feedbacks")
-        callback_manual.setup([input_text_comp, histo_text_comp, feedback_input], "Manual Feedback")
+        def callback_positive_and_log(feedback_type, histo_text_):
+            query = histo_text_[-1][0] if histo_text_ else ""  # Retrieve the last query
+            answer = histo_text_[-1][1] if histo_text_ else None
+            sources_contents = get_sources_contents()
+            logging.info(f"Feedback: {feedback_type}, Collection: {ctrl.retriever.collection.name}, Query: {query}, Answer: {answer}, Sources: {sources_contents}", extra={'category': 'Thumb Feedback', 'elapsed_time': 0})
+
+        # Similar for callback_negative_and_log
+
+        def callback_negative_and_log(feedback_type, histo_text_):
+            query = histo_text_[-1][0] if histo_text_ else ""  # Retrieve the last query
+            answer = histo_text_[-1][1] if histo_text_ else None
+            sources_contents = get_sources_contents()
+            logging.info(f"Feedback: {feedback_type}, Collection: {ctrl.retriever.collection.name}, Query: {query}, Answer: {answer}, Sources: {sources_contents}", extra={'category': 'Thumb Feedback', 'elapsed_time': 0})
 
         positive_button.click(
-            lambda: logging.info("Positive", extra={'category': 'Thumb Feedback', 'elapsed_time': 0, 'query': input_text_comp, 'histo': histo_text_comp} ),
-            inputs=[],            
-
-
+            lambda histo_text_comp: callback_positive_and_log("Positive", histo_text_comp),
+            inputs=[histo_text_comp],
+            outputs=None,
+            preprocess=False
         )
 
         negative_button.click(
-            lambda: logging.info("Negative", extra={'category': 'Thumb Feedback', 'elapsed_time': 0, 'query': input_text_comp, 'histo': histo_text_comp} ),
-            inputs=[]
+            lambda histo_text_comp: callback_negative_and_log("Negative", histo_text_comp),
+            inputs=[histo_text_comp],
+            outputs=None,
+            preprocess=False
+        )
 
-)
+
         feedback_input.submit(manual_feedback_callback, [feedback_input],outputs=[feedback_input], preprocess=False)
 
 
@@ -268,12 +286,12 @@ def run(ctrl: Chatbot, config: {}):
             .submit(input_text_fn1,
                     inputs=[input_text_comp, histo_text_comp],
                     outputs=[intro_text,histo_text_comp, input_example_comp,
-                             source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3]])\
+                             source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3],positive_button, negative_button])\
             .then(input_text_fn2,
                   inputs=[input_text_comp, histo_text_comp],
                   outputs=[intro_text,input_text_comp, histo_text_comp,
-                           source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3]])\
-            
+                           source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3],positive_button, negative_button])\
+                        
         input_example_comp \
             .input(input_example_fn,
                    inputs=[input_example_comp, histo_text_comp],

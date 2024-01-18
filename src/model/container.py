@@ -93,7 +93,6 @@ class Container:
 
     @property
     def structure(self):
-
         self_structure = {str(self.id_): {
             'index': str(self.id_),
             'canMove': True,

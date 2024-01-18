@@ -1,6 +1,5 @@
 import os
 from config import *
-
 import src.view.legacy_view as legacy_view
 import src.view.view_user as view_user
 #import src.view.view_admin as view_admin 
@@ -31,7 +30,7 @@ logging.config.fileConfig('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/
 
 chat = Chatbot(client_db=client_db, llm_agent=llm_agent, retriever=Retriever(llmagent=llm_agent))
 admin_view = AdminView(ctrl=chat, config=view_config)
-ilumio_qna_admin = legacy_view.run(ctrl=chat, config=view_config)
+ilumio_qna_admin = admin_view.run(ctrl=chat, config=view_config)
 
 ilumio_qna_admin.queue().launch()
 

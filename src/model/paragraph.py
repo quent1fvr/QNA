@@ -29,11 +29,36 @@ class Paragraph:
             self.text = "\n\nTable :\n" + self.text + "\n\n"
         return self
     
-    def handle_levels(self, font_style : str):
-        if len(font_style) != 5 and 'title' in font_style:
-            return int(font_style[-1])
-        elif len(font_style) == 2 and font_style[0] == 'h':
-            return int(font_style[-1])
+    # def handle_levels(self, font_style : str):
+    #     if len(font_style) != 5 and 'title' in font_style:
+    #         return int(font_style[-1])
+    #     elif len(font_style) == 2 and font_style[0] == 'h':
+    #         return int(font_style[-1])
+    #     else:
+    #         return INFINITE
+        
+    def handle_levels(self, font_style: str):
+        # Word-specific style parsing
+        if font_style.startswith('Heading '):
+            try:
+                level = int(font_style.split(' ')[-1])
+                return level
+            except ValueError:
+                return INFINITE
+
+        # PDF-specific style parsing
+        elif font_style.startswith('title'):
+            try:
+                # Assuming title7, title6, etc., corresponds to levels 7, 6, etc.
+                level = int(font_style.replace('title', ''))
+                return level
+            except ValueError:
+                return INFINITE
+        elif font_style == 'content':
+            # Assign a default level for general content
+            return INFINITE
+
+        # Default for unrecognized styles
         else:
             return INFINITE
-        
+

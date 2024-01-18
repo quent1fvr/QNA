@@ -15,6 +15,7 @@ class WordReader:
     def __init__(self, path):
         self.path = path
         self.paragraphs = self.get_paragraphs()
+        
     def iter_block_items(self, parent):
         if isinstance(parent, _Document):
             parent_elm = parent.element.body
@@ -44,14 +45,14 @@ class WordReader:
                     if paragraph_info:  # Only append if paragraph is not empty
                         page_id = self.estimate_page_number(total_characters)
                         p_obj = ParagraphHexa(text=paragraph_info['text'], font_style=paragraph_info['style'], id_=paragraph_id, page_id=page_id)
-                        #print(f"Found paragraph: {paragraph_info['style']}...")  # DEBUG
+                        print(f"Found paragraph: {paragraph_info['style']}...")  # DEBUG
                         paragraph_objects.append(p_obj)
                         paragraph_id += 1
                         total_characters += len(paragraph_info['text'])
                 elif isinstance(block, Table):
                     table_paragraph, table_style = self.table_to_paragraph(block)
                     if table_paragraph.strip():  # Check if table paragraph is not empty
-                        #print(f"Found table. Predominant style: {table_style}")  # DEBUG
+                        print(f"Found table. Predominant style: {table_style}")  # DEBUG
                         p_obj = ParagraphHexa(text=table_paragraph, font_style=table_style, id_=paragraph_id, page_id=page_id)
                         paragraph_objects.append(p_obj)
                         paragraph_id += 1
@@ -71,6 +72,8 @@ class WordReader:
 
         # Find the style with the highest count
         predominant_style = max(style_counts, key=style_counts.get, default="None")
+        if predominant_style == "Table Paragraph":
+            predominant_style = "Body Text"
         return predominant_style
 
     def estimate_page_number(self, total_characters):
@@ -83,6 +86,8 @@ class WordReader:
             return None  # Return None for empty paragraphs
 
         paragraph_style = paragraph.style.name if paragraph.style else 'None'
+        if paragraph_style == 'Normal':
+            paragraph_style = 'Body Text'
 
         runs = []
         for run in paragraph.runs:
@@ -101,8 +106,6 @@ class WordReader:
             'style': paragraph_style,
             'runs': runs
         }
-
-
 
     def table_to_paragraph(self, table):
         table_text = ""
@@ -138,7 +141,7 @@ class WordReader:
                     for row in item['table']:
                         for cell in row:
                             for paragraph in cell:
-                                print("   Cell Paragraph:", paragraph['text'])
+                                print("Cell Paragraph:", paragraph['text'])
                 print('-' * 40)  # separator for clarity
 
         except Exception as e:
@@ -153,12 +156,7 @@ class WordReader:
 #     word_reader = WordReader(path)
 #     word_reader.get_paragraphs()
 
-
-
 ################# LEGACY CODE ################
-
-
-
 
 # from __future__ import (
 #     absolute_import, division, print_function, unicode_literals

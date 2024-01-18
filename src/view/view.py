@@ -2,7 +2,7 @@ import gradio as gr
 from src.control.control import Chatbot
 from src.tools.embedding_factory import create_embedding_model
 from config import use_open_source_embeddings
-
+import logging
 theme = gr.themes.Soft(
     primary_hue="orange",
     secondary_hue="blue",
@@ -263,23 +263,53 @@ def run(ctrl: Chatbot, config: {}):
                 intro_text: gr.update(visible=False),
 
             }
+        def get_sources_contents():
+            # Extract the visible sources' contents from the source_text_comp array
+            sources_contents = [source.value for source in source_text_comp if source.visible]
+            return sources_contents
 
-            
-        # Modified callback for manual feedback
+    def callback_positive_and_log(feedback_type, args):
+        input_text, histo_text = args
+        query = input_text.value
+        answer = histo_text.value[-1][1] if histo_text.value else None
+        sources_contents = get_sources_contents()
+        logging.info(f"Feedback: {feedback_type}, Collection: [Your Collection Name], Query: {query}, Answer: {answer}, Sources: {sources_contents}", extra={'category': 'Thumb Feedback', 'elapsed_time': 0})
+        callback_positive.flag(args)
+
+
+
+    def callback_negative_and_log(feedback_type, args):
+        input_text, histo_text = args
+        query = input_text.value
+        answer = histo_text.value[-1][1] if histo_text.value else None
+        sources_contents = get_sources_contents()
+            # Modified callback for manual feedback
+        logging.info(f"Feedback: {feedback_type}, Collection: [Your Collection Name], Query: {query}, Answer: {answer}, Sources: {sources_contents}",
+                        extra={'category': 'Thumb Feedback', 'elapsed_time': 0})
+        callback_negative.flag(args)
+        
         def manual_feedback_callback(*args):
             callback_manual.flag(args)
             
             # Return an empty string to clear the Textbox
             return ""
 
-            
-        callback_positive.setup([input_text_comp, histo_text_comp], "Positive Feedbacks")
-        callback_negative.setup([input_text_comp, histo_text_comp], "Negative Feedbacks")
-        callback_manual.setup([input_text_comp, histo_text_comp, feedback_input], "Manual Feedback")
 
-        positive_button.click(lambda *args: callback_positive.flag(args, ), [input_text_comp, histo_text_comp], None, preprocess=False)
-        negative_button.click(lambda *args: callback_negative.flag(args, flag_option = "Incorrect answer"), [input_text_comp, histo_text_comp], None, preprocess=False)
-        
+
+        positive_button.click(
+            lambda *args: callback_positive_and_log("Positive", args),
+            inputs=[input_text_comp, histo_text_comp],
+            outputs=None,
+            preprocess=False
+        )
+
+        negative_button.click(
+            lambda *args: callback_negative_and_log("Negative", args),
+            inputs=[input_text_comp, histo_text_comp],
+            outputs=None,
+            preprocess=False
+        )
+
         feedback_input.submit(manual_feedback_callback, [input_text_comp, histo_text_comp, feedback_input],outputs=[feedback_input], preprocess=False)
 
 

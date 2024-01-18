@@ -18,13 +18,14 @@ class Doc:
         if self.extension == 'docx':
             paragraphs = WordReader(path).paragraphs
         elif self.extension == 'pdf':
-            if "Illumio_Core_REST_API_Developer_Guide_23.3" in self.title:
+            if "ilumio" in self.title:
                 paragraphs = Reader_illumio(path).paragraphs
             else:
                 paragraphs = Reader(path, actual_first_page, include_images).paragraphs
         else:
             paragraphs = Reader_HTML(path).paragraphs
         self.container = Container(paragraphs, father=self, title=self.set_first_container_title(self.title.split(".")[0],self.extension))
+        print(self.id_)
         set_indexes(self.container)
         self.blocks = self.get_blocks()
 

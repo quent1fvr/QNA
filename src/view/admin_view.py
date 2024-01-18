@@ -30,24 +30,44 @@ class AdminView:
         # Read and parse logs on initialization
         self.read_and_parse_logs()
         
-    def parse_feedback_log_entry(self, log_entry):
+    def parse_feedback_log_entry(self,log_entry):
         try:
+            # General Pattern for Both Types of Feedback
             match = re.match(
-                r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) - INFO - (Thumb Feedback|Manual Feedback) - (Positive|Negative|Feedback: (.*?)) - Temps: (.+)',
+                r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) - INFO - (Thumb Feedback|Manual Feedback) - Feedback: (.*?)(, Collection: (.*?), Query: (.*?), Answer: (.*?), Sources: (\[.*?\]))? - Temps: (.+)',
                 log_entry
             )
+
             if match:
-                timestamp, feedback_type, _, feedback, response_time = match.groups()
-                return {
+                timestamp, feedback_type, feedback, _, collection, query, answer, sources, response_time = match.groups()
+
+                # Prepare the dictionary
+                entry_dict = {
                     "timestamp": pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S,%f'),
                     "feedback_type": feedback_type,
-                    "feedback": feedback if feedback else _,
+                    "feedback": feedback,
                     "response_time": response_time
                 }
+
+                # Add additional fields for Thumb Feedback
+                if feedback_type == 'Thumb Feedback':
+                    entry_dict.update({
+                        "collection": collection,
+                        "query": query,
+                        "answer": answer,
+                        "sources": sources
+                    })
+
+                return entry_dict
+
         except Exception as e:
             print(f"Error parsing feedback log entry: {e}")
         return None
+
+
+
     
+
     def parse_log_entry_history(self, log_entry):
         try:
             # Use regular expressions to extract the timestamp, level, and main message
@@ -104,9 +124,9 @@ class AdminView:
             return None
 
 
-    def parse_log_entry(self, entry):
+    def parse_log_entry(self,entry):
         # Original log format pattern
-        original_pattern = r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) - (\w+) - (\w+) - Collection: ([\w\s_]+)[^-]* - Time: ([0-9.]+)'
+        original_pattern = r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) - (\w+) - (\w+) - Collection: ([\w\s_]+) , Query: .* - Time: ([0-9.]+)'
         match = re.search(original_pattern, entry)
 
         if match:
@@ -167,9 +187,9 @@ class AdminView:
         
     def refresh_plots(self):
         # Call generate_plots to get the updated plot
-        updated_fig1,updated_fig2,updated_fig3,updated_fig4,updated_fig5,updated_fig7,updated_fig8,updated_fig9 = self.generate_plots()
+        updated_fig1,updated_fig2,updated_fig3,updated_fig4,updated_fig5,updated_fig7,updated_fig8,updated_fig9,updated_fig10 = self.generate_plots()
         # Return the updated plot
-        return updated_fig1,updated_fig2,updated_fig3,updated_fig4,updated_fig5,updated_fig7,updated_fig8,updated_fig9
+        return updated_fig1,updated_fig2,updated_fig3,updated_fig4,updated_fig5,updated_fig7,updated_fig8,updated_fig9,updated_fig10
 
 
 
@@ -251,8 +271,8 @@ class AdminView:
         fig3 = px.pie(df_status, names='Status', values='Count', title='Success vs Failure Rate')
         fig3.update_traces(textinfo='percent+label', hoverinfo='label+value')
         #fig3.show()
+        
         query_df = self.df_logs[self.df_logs['Activity'] == 'Query']
-
         fig4 = go.Figure()
 
         # Get unique collections from the filtered dataframe
@@ -315,13 +335,13 @@ class AdminView:
         fig8.update_xaxes(tickangle=-45)
 
         # Table of Manual Feedbacks
-        df_manual_feedback_reversed = self.df_manual_feedback.iloc[::-1]
+        df_manual_feedback_reversed = self.df_manual_feedback.iloc[::-1][['timestamp', 'feedback']]
 
-    # Create a Plotly table with the reversed DataFrame
+        # Create a Plotly table with the reversed and filtered DataFrame
         fig9 = go.Figure(data=[go.Table(
             header=dict(
                 values=list(df_manual_feedback_reversed.columns),
-                fill_color='lightblue',
+                fill_color='orange',
                 align='left'
             ),
             cells=dict(
@@ -334,15 +354,38 @@ class AdminView:
         fig9.update_layout(title='Table of Manual Feedbacks')
         fig9.update_layout(height=400, width=1200)
 
+        # Show the plot
 
-        return fig1,fig2,fig3,fig4,fig5,fig7,fig8,fig9
+
+        required_columns = ['timestamp', 'feedback', 'collection', 'query', 'answer', 'sources']
+
+        # Create the table with only the specified columns
+        fig10 = go.Figure(data=[go.Table(
+            header=dict(
+                values=[column for column in required_columns if column in self.df_thumb_feedback.columns],
+                fill_color='orange',
+                align='left'
+            ),
+            cells=dict(
+                values=[self.df_thumb_feedback[column].tolist() for column in required_columns if column in self.df_thumb_feedback.columns],
+                fill_color='white',
+                align='left'
+            )
+        )])
+
+        fig10.update_layout(title='Table of Thumb Feedbacks')
+        fig10.update_layout(height=400, width=1200)
+
+
+        return fig1,fig2,fig3,fig4,fig5,fig7,fig8,fig9,fig10
 
     def gradio_interface(self):
         # Generate plots first
-        fig1, fig2, fig3, fig4, fig5, fig7, fig8, fig9 = self.generate_plots()
-
+        fig1, fig2, fig3, fig4, fig5, fig7, fig8,fig9,fig10 = self.generate_plots()
         # Return the figures
-        return fig1, fig2, fig3, fig4, fig5, fig7, fig8, fig9
+        return fig1, fig2, fig3, fig4, fig5, fig7, fig8,fig9,fig10
+    
+    
     def read_and_parse_logs(self):
         with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/Logs/generated_log.log', 'r') as file:
             logs = [self.parse_log_entry(line) for line in file if self.parse_log_entry(line)]
@@ -353,9 +396,15 @@ class AdminView:
                 [self.parse_log_entry_history(line) for line in file if self.is_valid_log_entry(self.parse_log_entry_history(line))]
             )
         with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/Logs/generated_log.log', 'r') as file:
-            parsed_feedback = [self.parse_feedback_log_entry(line) for line in file if 'Feedback' in line]
-        parsed_feedback = [feedback for feedback in parsed_feedback if feedback is not None]
+            parsed_entries = []
+            for line in file:
+                parsed_entry = self.parse_feedback_log_entry(line.strip())
+                if parsed_entry is not None:
+                    parsed_entries.append(parsed_entry)      
+            
+        parsed_feedback = [feedback for feedback in parsed_entries if feedback is not None]
         self.df_feedback = pd.DataFrame(parsed_feedback)
+
         self.df_thumb_feedback = self.df_feedback[self.df_feedback['feedback_type'] == 'Thumb Feedback']
         self.df_manual_feedback = self.df_feedback[self.df_feedback['feedback_type'] == 'Manual Feedback'].drop('response_time', axis=1)
         self.thumb_feedback_counts = self.df_thumb_feedback['feedback'].value_counts()
@@ -674,8 +723,18 @@ class AdminView:
                         with gr.Column():
                             plot8 = gr.Plot()
                             refresh_button = gr.Button("Refresh Plot")
+                            #load_button.click(fn=gradio_interface, inputs=[], outputs=[plot1, plot2, plot3, plot4, plot5, plot7,plot8,plot9]) 
+                                                  
+                with gr.Tab("thumbs Feedbacks History"):
+                    with gr.Row():
+                        with gr.Column(scale=0):  # Small column for the download button
+                            refresh_button = gr.Button("Refresh Plot")
                             #load_button.click(fn=gradio_interface, inputs=[], outputs=[plot1, plot2, plot3, plot4, plot5, plot7,plot8,plot9])                       
-                            
+                            download_button = gr.File(label="Download Excel", value=self.dataframe_to_excel(self.df_thumb_feedback))
+                    with gr.Row():
+                        plot10 = gr.Plot()
+                  
+                                              
                 with gr.Tab("Manual Feedbacks"):
                     with gr.Row():
                         with gr.Column(scale=0):  # Small column for the download button
@@ -684,12 +743,12 @@ class AdminView:
                             download_button = gr.File(label="Download Excel", value=self.dataframe_to_excel(self.df_manual_feedback))
                     with gr.Row():
                         plot9 = gr.Plot()
-                refresh_button.click(fn=self.refresh_plots, inputs=[], outputs=[plot1,plot2,plot3,plot4,plot5,plot7,plot8,plot9])
+            refresh_button.click(fn=self.refresh_plots, inputs=[], outputs=[plot1,plot2,plot3,plot4,plot5,plot7,plot8,plot9,plot10])
 
-                                                    
+                                  
                             
                             
-            qna.load(fn=self.gradio_interface, outputs=[plot1, plot2, plot3, plot4, plot5,plot7, plot8,plot9])
+            qna.load(fn=self.gradio_interface, outputs=[plot1, plot2, plot3, plot4, plot5,plot7, plot8,plot9,plot10])
 
 
         return qna

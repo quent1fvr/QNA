@@ -52,6 +52,7 @@ llm_openai = "gpt-3.5-turbo"
 #     temperature=0,
 # )
 
+
 # def load_model(model_name):
 #     model_path = os.path.join(model_dir, model_name)
 #     return LlamaCpp(
@@ -67,7 +68,6 @@ llm_openai = "gpt-3.5-turbo"
 
 # ----- Embeddings Configuration -----
 # Choose whether to use open-source embeddings
-# Setting this to False will use an alternative embedding model, possibly proprietary
 
 
 use_open_source_embeddings = False  
