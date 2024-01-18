@@ -15,7 +15,7 @@ def run(ctrl: Chatbot, config: {}):
 
     with gr.Blocks(theme=theme) as qna:
         with gr.Row():
-            with gr.Column(scale=2, elem_id="margin-top-row"):
+            with gr.Column(scale=1, elem_id="margin-top-row"):
                 collections_listB = gr.Dropdown(
                     choices=[a.name for a in ctrl.client_db.list_collections()],
                     label="Current collections in the database",
@@ -33,9 +33,9 @@ def run(ctrl: Chatbot, config: {}):
                     info="Choose a collection to query.",
                     elem_classes="margin-top-row",
                 )
-                positive_button = gr.Button("👍", visible=False)
-                negative_button = gr.Button("👎", visible=False)
-                feedback_input = gr.Textbox(interactive=True, label=" Manual Feedback")             
+                feedback_input = gr.Textbox(interactive=True, label=" Manual Feedback")   
+
+          
             with gr.Column(scale=6):
                  
                 gr.Markdown(config['title'])
@@ -58,6 +58,8 @@ def run(ctrl: Chatbot, config: {}):
 
 
                 clear_btn = gr.Button("Clear Chat", visible=False)
+                positive_button = gr.Button("👍", visible=False)
+                negative_button = gr.Button("👎", visible=False)
 
                 input_example_comp = gr.Radio(
                     label="Examples",
@@ -65,6 +67,11 @@ def run(ctrl: Chatbot, config: {}):
                     value="",
                     visible=True,
                 )
+                
+
+
+            # Another empty column for centering
+            with gr.Column(scale=2):
                 
                 source_text_comp = []
                 for i in range(4):
@@ -75,7 +82,7 @@ def run(ctrl: Chatbot, config: {}):
                         visible=False,
                     ))
                     
-
+                
             embedding_model = create_embedding_model(use_open_source_embeddings)
                 
             collections = ctrl.client_db.list_collections()
@@ -86,8 +93,6 @@ def run(ctrl: Chatbot, config: {}):
             if default_collection_name:
                 ctrl.retriever.collection = ctrl.client_db.get_collection(
                     default_collection_name, embedding_function=embedding_model)
-                            
-                        
 
 
                 
