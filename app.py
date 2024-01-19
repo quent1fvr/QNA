@@ -30,7 +30,7 @@ logging.config.fileConfig('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/
 
 chat = Chatbot(client_db=client_db, llm_agent=llm_agent, retriever=Retriever(llmagent=llm_agent))
 admin_view = AdminView(ctrl=chat, config=view_config)
-ilumio_qna_admin = admin_view.run(ctrl=chat, config=view_config)
+ilumio_qna_admin = view_user.run(ctrl=chat, config=view_config)
 
 ilumio_qna_admin.queue().launch()
 
