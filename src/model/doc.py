@@ -3,6 +3,7 @@ from src.tools.index_creation import set_indexes
 from src.Readers.reader_word import WordReader
 from src.Readers.readers_pdf import Reader, Reader_illumio
 from src.Readers.reader_html import Reader_HTML
+from src.Readers.reader_excel import ReaderExcel
 from src.model.paragraph import Paragraph
 
 
@@ -22,8 +23,11 @@ class Doc:
                 paragraphs = Reader_illumio(path).paragraphs
             else:
                 paragraphs = Reader(path, actual_first_page, include_images).paragraphs
-        else:
+        elif self.extension == 'html':
             paragraphs = Reader_HTML(path).paragraphs
+        
+        else :
+            paragraphs = ReaderExcel(path).paragraphs
         self.container = Container(paragraphs, father=self, title=self.set_first_container_title(self.title.split(".")[0],self.extension))
         print(self.id_)
         set_indexes(self.container)

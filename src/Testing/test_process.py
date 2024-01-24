@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     # Set the OpenAI API key from a configuration file if it's not already in the environment.
     if not "OPENAI_API_KEY" in os.environ:
-        from config_key import OPENAI_API_KEY
+        from Chatbot_llama2_questions.config_key import OPENAI_API_KEY
         os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 
     # Initialize a callback manager with a streaming stdout handler.

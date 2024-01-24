@@ -17,9 +17,6 @@ def create_embedding_model(use_open_source_embeddings: bool):
         # )
         
         return embedding_functions.SentenceTransformerEmbeddingFunction(model_name="BAAI/bge-large-zh-v1.5")
-
-
-
     else:
         # Instantiate and return the OpenAI embedding model
         return embedding_functions.OpenAIEmbeddingFunction(

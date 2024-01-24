@@ -33,6 +33,8 @@ class Retriever:
             # Process each block in the document.
             for block in blocks_good_format:
                 print(f"block index : {block.index}")
+                print(doc.title)
+
                 # If block content is longer than 4500 characters, split and summarize separately.
                 if len(block.content) > 4500:
                     new_blocks = block.separate_1_block_in_n(max_size=4500)
@@ -44,17 +46,18 @@ class Retriever:
                         self.collection.add(
                             documents=[summary],
                             ids=[new_block.index],
-                            metadatas=[new_block.to_dict()]
+                            metadatas= [block.to_dict()]
                         )
                 else:
                     # Summarize the block as is if it's shorter than 4500 characters.
+                    print(doc.title)
                     summary = llmagent.summarize_paragraph_v2(prompt=block.content, title_doc=doc.title, title_para=block.title)
                     if "<summary>" in summary:
                         summary = summary.split("<summary>")[1]
                     self.collection.add(
                         documents=[summary],
                         ids=[block.index],
-                        metadatas=[block.to_dict()]
+                        metadatas= [block.to_dict()]
                     )
                     
             # Summarize blocks by their hierarchy level after individual processing.
@@ -109,8 +112,8 @@ class Retriever:
 
                 self.collection.add(
                     documents=[level_summary],
-                    ids=[level_summary_id],
-                    metadatas=[combined_block.to_dict()]  # Pass the combined block metadata
+                    ids=["doc_title", level_summary_id],
+                    metadatas=[combined_block.to_dict()]
                 )
                  # List of dictionaries, each representing a block
                 

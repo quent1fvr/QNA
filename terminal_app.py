@@ -143,7 +143,7 @@ def main():
     """
     os.environ["TOKENIZERS_PARALLELISM"] = "true"
     if "OPENAI_API_KEY" not in os.environ:
-        from config_key import OPENAI_API_KEY
+        from Chatbot_llama2_questions.config_key import OPENAI_API_KEY
         os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 
     collection_manager = CollectionManager()

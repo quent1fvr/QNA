@@ -104,16 +104,16 @@ class Chatbot:
     def upload_doc(self,input_doc,include_images_,actual_page_start):
         title = Doc.get_title(Doc,input_doc.name)
         extension = title.split('.')[-1]
-        if extension and (extension == 'docx' or extension == 'pdf' or extension == 'html'):
+        if extension and (extension == 'docx' or extension == 'pdf' or extension == 'html' or extension=='xlsx'):
                 
-            embedding_model = create_embedding_model(use_open_source_embeddings)
+            embedding= create_embedding_model(use_open_source_embeddings)
 
-            coll_name = "".join([c if c.isalnum() else "_" for c in title])
-            
-            coll_name = coll_name
-            
-            collection = self.client_db.get_or_create_collection(name=coll_name, embedding_function=embedding_model)
-
+            #coll_name = "".join([c if c.isalnum() else "_" for c in title])
+            #coll_name = coll_name
+            try: 
+                collection = self.client_db.get_collection(name=self.retriever.collection.name, embedding_function=embedding)
+            except:
+                gr.Warning("Please select a collection to ingest your document")
 
             if collection.count() >=0:
                 gr.Info("Please wait while your document is being analysed")
@@ -130,17 +130,14 @@ class Chatbot:
 
             self.retriever = retriever
         else:
-            
             return False
         return True
     
     def upload_docV2(self,input_doc,include_images_,actual_page_start):
         title = Doc.get_title(Doc,input_doc.name)
         extension = title.split('.')[-1]
-        if extension and (extension == 'docx' or extension == 'pdf' or extension == 'html'):
-            
+        if extension and (extension == 'docx' or extension == 'pdf' or extension == 'html' or extension=='xlsx'):
             embedding_model = create_embedding_model(use_open_source_embeddings)
-
             coll_name = "".join([c if c.isalnum() else "_" for c in title])
             collection = self.client_db.get_or_create_collection(name=coll_name, embedding_function=embedding_model)
 

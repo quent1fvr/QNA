@@ -20,17 +20,17 @@ if not "OPENAI_API_KEY" in os.environ:
 
 llm_agent = create_llm_agent(use_open_source_generation)
 
-if not os.path.exists("database_structuredemo2 copy/"): 
-    os.makedirs("database_structuredemo2 copy/")
+if not os.path.exists("database_demo/"): 
+    os.makedirs("database_demo/")
     
-client_db = chromadb.PersistentClient("database_structuredemo2 copy/")
+client_db = chromadb.PersistentClient("database_demo/")
 
 logging.config.fileConfig('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/Logs/logging_config.ini')
 
-
+ 
 chat = Chatbot(client_db=client_db, llm_agent=llm_agent, retriever=Retriever(llmagent=llm_agent))
 admin_view = AdminView(ctrl=chat, config=view_config)
-ilumio_qna_admin = view_user.run(ctrl=chat, config=view_config)
+ilumio_qna_admin = admin_view.run(ctrl=chat, config=view_config)
 
 ilumio_qna_admin.queue().launch()
 

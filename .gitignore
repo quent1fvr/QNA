@@ -183,3 +183,4 @@ cython_debug/
 #.idea/
 /src/model/opensource_models/
 database_structuredemo2 copy
+database_demo

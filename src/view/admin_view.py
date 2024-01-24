@@ -9,6 +9,9 @@ import plotly.graph_objects as go
 import tempfile
 from src.control.control import Chatbot
 from chromadb.utils import embedding_functions
+from src.tools.embedding_factory import create_embedding_model
+from config import use_open_source_embeddings
+
 
 class AdminView:
     def __init__(self, ctrl: Chatbot, config: {}):
@@ -91,7 +94,7 @@ class AdminView:
 
             # Extract sources
             # Find the entire 'Sources' to 'Temps' section
-            sources_section_match = re.search(r'Sources: (.*) - Temps:', log_entry, re.DOTALL)
+            sources_section_match = re.search(r'Sources: (.*) - Time:', log_entry, re.DOTALL)
             sources_section = sources_section_match.group(1).strip() if sources_section_match else None
             
             # Clean up the 'Sources' section to extract the list
@@ -304,16 +307,17 @@ class AdminView:
         
 
         df_logs_history_reversed = self.df_logs_history.iloc[::-1]
+        columns_without_time = [col for col in df_logs_history_reversed.columns if col != 'Time']
 
         # Create a Plotly table with the reversed DataFrame
         fig7 = go.Figure(data=[go.Table(
             header=dict(
-                values=list(df_logs_history_reversed.columns),
+                values=list(columns_without_time),
                 fill_color='orange',
                 align='left'
             ),
             cells=dict(
-                values=[df_logs_history_reversed[k].tolist() for k in df_logs_history_reversed.columns],
+                values=[df_logs_history_reversed[k].tolist() for k in columns_without_time],
                 fill_color='white',
                 align='left'
             )
@@ -419,7 +423,26 @@ class AdminView:
             with gr.Tabs() as tabs:
                 with gr.Tab("Admin view "):
                     with gr.Row():
-                        with gr.Column(scale=10):
+                        with gr.Column(scale=3):
+                            add_collection_btn = gr.Textbox(interactive=True, label=" Add collection", visible=True)
+
+                            collections_list = gr.Radio(choices=[a.name for a in ctrl.client_db.list_collections()],
+                                label="Current collections in the database",
+                                visible=True
+                            )
+                            delete_database_btn = gr.Button("Delete current collection", visible=True) 
+
+                            if ctrl.retriever.collection is not None:
+                                metadata_docs_update = gr.Radio(choices=[item['doc'] for item in ctrl.retriever.collection.get()['metadatas']],
+                                    label="Documents in the collection"
+                                )
+                            else:
+                                metadata_docs_update = gr.Radio(choices=[],
+                                    label="Documents in the collection"
+                                )  
+                                
+                                   
+                        with gr.Column(scale=6):
                             gr.Markdown(config['title'])
                             page_start_warning = gr.Markdown("The administrator is allowed to upload / delete a collection. If your document starts with a front cover and/or a table of contents, please enter the page number of the first page with real content.")
                             actual_page_start = gr.Number(
@@ -436,7 +459,10 @@ class AdminView:
                                 visible=True,
                                 container=True,
                             )
-
+                            # collections_list = gr.Dropdown(choices=[a.name for a in ctrl.client_db.list_collections()],
+                            #     label="Select a collection for your document ",
+                            #     visible=True
+                            # )
                             input_doc_comp = gr.File(
                                 label="Upload a file",
                                 scale=1,
@@ -475,14 +501,11 @@ class AdminView:
                                 ))
                             upload_another_doc_btn = gr.Button("Upload another document", visible=False)
 
-                        open_ai_embedding = embedding_functions.OpenAIEmbeddingFunction(api_key=os.environ['OPENAI_API_KEY'], model_name="text-embedding-ada-002")
-                        with gr.Column(scale=7):
-                            collections_list = gr.Radio(choices=[a.name for a in ctrl.client_db.list_collections()],
-                                label="Current collections in the database",
-                                visible=True,
-                                info="Choose a collection to query."
-                            )
-                            delete_database_btn = gr.Button("Delete current collection", visible=True) 
+                        open_ai_embedding = embedding_functions.OpenAIEmbeddingFunction(api_key=os.environ['OPENAI_API_KEY'],model_name="text-embedding-ada-002"
+        )
+                        with gr.Column(scale=3):    
+                            pass
+                            
                     def input_doc_fn(input_doc_, include_images_, actual_page_start_):
                         start_time = time.time()
                         result = ctrl.upload_doc(input_doc_,include_images_, actual_page_start_)
@@ -593,6 +616,9 @@ class AdminView:
 
                     def change_collection(collection_name):
                         ctrl.retriever.collection = ctrl.client_db.get_collection(collection_name, embedding_function=open_ai_embedding)
+                        metadata_docs = set([item['doc'] for item in ctrl.retriever.collection.get()['metadatas']])
+                        #metadata_doc = ctrl.retriever.collection.get()['metadatas']['doc']
+                        print("Total records in the collection: ", metadata_docs)
                         return {
                             delete_database_btn: gr.update(visible=True),
                             input_doc_comp: gr.update(visible=True,value=None),
@@ -605,8 +631,16 @@ class AdminView:
                             upload_another_doc_btn: gr.update(visible=False),
                             actual_page_start: gr.update(visible=True),
                             page_start_warning: gr.update(visible=True),
+                            metadata_docs_update:gr.update(choices=set([item['doc'] for item in ctrl.retriever.collection.get()['metadatas']]))
                         }
+                    def doc_in_collection(collection_name):
+                        metadata_docs = set([item['doc'] for item in ctrl.retriever.collection.get()['metadatas']])
+                        update = {
+                            metadata_docs_update:gr.update(choices=list(metadata_docs))
 
+                        }
+                        return update
+                    
                     def delete_curr_database():
                         start_time = time.time()
                         ctrl.client_db.delete_collection(ctrl.retriever.collection.name)
@@ -626,6 +660,26 @@ class AdminView:
                             actual_page_start: gr.update(visible=True, value=1),
                             page_start_warning: gr.update(visible=True),
                         }
+                        
+                    def add_collection(collection_name):
+                        ctrl.retriever.collection = ctrl.client_db.create_collection(collection_name, embedding_function=embedding_functions.OpenAIEmbeddingFunction(
+            api_key=os.environ['OPENAI_API_KEY'],
+            model_name="text-embedding-ada-002"))
+                        return {
+                            add_collection_btn: gr.update(visible=True, value=""),
+                            delete_database_btn: gr.update(visible=True),
+                            input_doc_comp: gr.update(visible=True,value=None),
+                            input_text_comp: gr.update(visible=False, value=''),
+                            input_example_comp: gr.update(visible=False),
+                            clear_btn: gr.update(visible=False),
+                            collections_list: gr.update(choices=[a.name for a in ctrl.client_db.list_collections()]),
+                            include_images_btn: gr.update(visible=True),
+                            histo_text_comp: gr.update(visible=False, value=''),
+                            upload_another_doc_btn: gr.update(visible=False),
+                            actual_page_start: gr.update(visible=True),
+                            page_start_warning: gr.update(visible=True),
+                        }
+
 
                     upload_another_doc_btn.click(input_file_clear,
                                     inputs=None,
@@ -635,9 +689,14 @@ class AdminView:
                                     inputs=None,
                                     outputs=[page_start_warning, actual_page_start, delete_database_btn, input_doc_comp, input_text_comp, input_example_comp, clear_btn, collections_list, include_images_btn, histo_text_comp, upload_another_doc_btn])
 
+
+                    add_collection_btn.submit(add_collection,
+                                    inputs=[add_collection_btn],
+                                    outputs=[add_collection_btn,page_start_warning, actual_page_start, delete_database_btn, input_doc_comp, input_text_comp, input_example_comp, clear_btn, collections_list, include_images_btn, histo_text_comp, upload_another_doc_btn])
+                                                               
                     collections_list.input(change_collection,
                                     inputs=[collections_list],
-                                    outputs=[actual_page_start, page_start_warning, collections_list, input_text_comp, input_example_comp, clear_btn, include_images_btn, histo_text_comp, input_doc_comp, delete_database_btn,upload_another_doc_btn])
+                                    outputs=[actual_page_start, page_start_warning, collections_list, input_text_comp, input_example_comp, clear_btn, include_images_btn, histo_text_comp, input_doc_comp, delete_database_btn,upload_another_doc_btn,metadata_docs_update])
 
                     input_doc_comp \
                         .upload(input_doc_fn,
@@ -745,7 +804,7 @@ class AdminView:
                         plot9 = gr.Plot()
             refresh_button.click(fn=self.refresh_plots, inputs=[], outputs=[plot1,plot2,plot3,plot4,plot5,plot7,plot8,plot9,plot10])
 
-                                  
+                      
                             
                             
             qna.load(fn=self.gradio_interface, outputs=[plot1, plot2, plot3, plot4, plot5,plot7, plot8,plot9,plot10])

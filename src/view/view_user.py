@@ -33,6 +33,17 @@ def run(ctrl: Chatbot, config: {}):
                     info="Choose a collection to query.",
                     elem_classes="margin-top-row",
                 )
+                if ctrl.retriever.collection is not None:
+                    metadata_docs_update = gr.Radio(choices=[item['doc'] for item in ctrl.retriever.collection.get()['metadatas']],
+                        label="Documents in the collection"
+                    )
+                    
+                else:
+                    metadata_docs_update = gr.Radio(choices=[],
+                        label="Documents in the collection"
+                    )      
+                    
+                                
                 feedback_input = gr.Textbox(interactive=True, label=" Manual Feedback")   
 
           
@@ -219,7 +230,9 @@ def run(ctrl: Chatbot, config: {}):
                 clear_btn: gr.update(visible=True),
                 collections_list: gr.update(choices=[a.name for a in ctrl.client_db.list_collections()]),
                 histo_text_comp: gr.update(visible=False, value=''),
-                intro_text: gr.update(visible=False),             
+                intro_text: gr.update(visible=False),           
+                metadata_docs_update:gr.update(choices=set([item['doc'] for item in ctrl.retriever.collection.get()['metadatas']]))
+  
             }
 
         def delete_curr_database():
@@ -283,7 +296,7 @@ def run(ctrl: Chatbot, config: {}):
 
         collections_list.input(change_collection,
                         inputs=[collections_list],
-                        outputs=[intro_text, collections_list, input_text_comp, input_example_comp, clear_btn, histo_text_comp])
+                        outputs=[intro_text, collections_list, input_text_comp, input_example_comp, clear_btn, histo_text_comp, metadata_docs_update])
 
 
         

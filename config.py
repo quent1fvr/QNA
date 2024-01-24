@@ -1,4 +1,4 @@
-from langchain.llms import LlamaCpp
+from langchain_community.llms import LlamaCpp 
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 import os
