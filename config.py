@@ -96,7 +96,7 @@ view_config = {
         font-weight: bold;
         margin-top: 4%;
         padding-bottom: 1%;
-    ">AskTheDocs</h1>
+    ">Eurêka</h1>
     """,
     'examples': examples,
 }

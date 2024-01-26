@@ -56,8 +56,6 @@ class LlmAgentOS:
         response = llm_chain.run({"text": text})
         return str(response)
 
-    # ... [rest of the class with similar modifications]
-
     # Continuing from the previous functions....
 
     def generate_answer(self, query: str, answer: str, histo: str, context: str, language: str) -> str:

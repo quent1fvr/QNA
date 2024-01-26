@@ -415,8 +415,26 @@ class AdminView:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     def run(self, ctrl: Chatbot, config: {}):
         self.read_and_parse_logs()
+        open_ai_embedding = embedding_functions.OpenAIEmbeddingFunction(api_key=os.environ['OPENAI_API_KEY'],model_name="text-embedding-ada-002")
+        print(ctrl.client_db.list_collections())
+        ctrl.retriever.collection = ctrl.client_db.get_collection("tet", embedding_function=open_ai_embedding)
 
         with gr.Blocks(theme=self.theme) as qna:
             gr.Markdown("## Administrator view")
@@ -424,24 +442,36 @@ class AdminView:
                 with gr.Tab("Admin view "):
                     with gr.Row():
                         with gr.Column(scale=3):
-                            add_collection_btn = gr.Textbox(interactive=True, label=" Add collection", visible=True)
+                            add_collection_btn = gr.Textbox(interactive=True, label=" Add collection", visible=False)
 
                             collections_list = gr.Radio(choices=[a.name for a in ctrl.client_db.list_collections()],
                                 label="Current collections in the database",
-                                visible=True
+                                visible=False,
                             )
-                            delete_database_btn = gr.Button("Delete current collection", visible=True) 
+                            delete_database_btn = gr.Button("Delete current collection", visible=False) 
 
-                            if ctrl.retriever.collection is not None:
-                                metadata_docs_update = gr.Radio(choices=[item['doc'] for item in ctrl.retriever.collection.get()['metadatas']],
-                                    label="Documents in the collection"
-                                )
-                            else:
-                                metadata_docs_update = gr.Radio(choices=[],
-                                    label="Documents in the collection"
-                                )  
+                            metadata_docs_update = gr.CheckboxGroup(choices=set([item['doc'] for item in ctrl.retriever.collection.get()['metadatas']]),
+                                label="Documents in the collection", interactive = True 
+                            )
+
+                            import json
+                            with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/view/dict_of_folders.json', 'r') as file:
+                                Dict_of_folders = json.load(file)
+                                print(Dict_of_folders)                               
                                 
-                                   
+                            folder_name_input = gr.Textbox(interactive=True, label="Folder name", visible=True)
+                            Folder_button = gr.Button(value = "Submit")
+                            Folders_list=[]
+
+                            Folders_list = gr.Radio(
+                                choices=[folder for folder in Dict_of_folders["Name"]],
+                                label="Folder list",
+                                interactive=True
+                            )
+
+                            Documents_in_folder = gr.CheckboxGroup(choices=[])
+                            delete_folder_button = gr.Button(value = "Delete folder")
+                            delete_file_in_folder_button = gr.Button(value = "Delete file")
                         with gr.Column(scale=6):
                             gr.Markdown(config['title'])
                             page_start_warning = gr.Markdown("The administrator is allowed to upload / delete a collection. If your document starts with a front cover and/or a table of contents, please enter the page number of the first page with real content.")
@@ -520,7 +550,7 @@ class AdminView:
                                 input_example_comp: gr.update(visible=True),
                                 clear_btn: gr.update(visible=False),
                                 include_images_btn: gr.update(visible=True,value=include_images_),
-                                delete_database_btn: gr.update(visible=True),
+                                delete_database_btn: gr.update(visible=False),
                                 upload_another_doc_btn: gr.update(visible=True),
                                 collections_list: gr.update(choices=[a.name for a in ctrl.client_db.list_collections()],value=ctrl.retriever.collection.name),
                                 page_start_warning: gr.update(visible=True),
@@ -548,7 +578,7 @@ class AdminView:
                             input_example_comp: gr.update(value='', visible=False),
                             include_images_btn: gr.update(visible=True),
                             upload_another_doc_btn: gr.update(visible=False),
-                            delete_database_btn: gr.update(visible=True),
+                            delete_database_btn: gr.update(visible=False),
                             page_start_warning: gr.update(visible=True),
                             actual_page_start: gr.update(visible=True, value=1),
                             collections_list: gr.update(value=None, choices=[a.name for a in ctrl.client_db.list_collections()]),
@@ -620,7 +650,7 @@ class AdminView:
                         #metadata_doc = ctrl.retriever.collection.get()['metadatas']['doc']
                         print("Total records in the collection: ", metadata_docs)
                         return {
-                            delete_database_btn: gr.update(visible=True),
+                            delete_database_btn: gr.update(visible=False),
                             input_doc_comp: gr.update(visible=True,value=None),
                             input_text_comp: gr.update(visible=False, value=''),
                             input_example_comp: gr.update(visible=False),
@@ -631,12 +661,12 @@ class AdminView:
                             upload_another_doc_btn: gr.update(visible=False),
                             actual_page_start: gr.update(visible=True),
                             page_start_warning: gr.update(visible=True),
-                            metadata_docs_update:gr.update(choices=set([item['doc'] for item in ctrl.retriever.collection.get()['metadatas']]))
+                            metadata_docs_update:gr.update(choices=set([item['doc'] for item in ctrl.retriever.collection.get()['metadatas']]),interactive = True )
                         }
                     def doc_in_collection(collection_name):
                         metadata_docs = set([item['doc'] for item in ctrl.retriever.collection.get()['metadatas']])
                         update = {
-                            metadata_docs_update:gr.update(choices=list(metadata_docs))
+                            metadata_docs_update:gr.update(choices=list(metadata_docs),interactive=True),
 
                         }
                         return update
@@ -663,11 +693,11 @@ class AdminView:
                         
                     def add_collection(collection_name):
                         ctrl.retriever.collection = ctrl.client_db.create_collection(collection_name, embedding_function=embedding_functions.OpenAIEmbeddingFunction(
-            api_key=os.environ['OPENAI_API_KEY'],
-            model_name="text-embedding-ada-002"))
+                        api_key=os.environ['OPENAI_API_KEY'],
+                        model_name="text-embedding-ada-002"))
                         return {
                             add_collection_btn: gr.update(visible=True, value=""),
-                            delete_database_btn: gr.update(visible=True),
+                            delete_database_btn: gr.update(visible=False),
                             input_doc_comp: gr.update(visible=True,value=None),
                             input_text_comp: gr.update(visible=False, value=''),
                             input_example_comp: gr.update(visible=False),
@@ -680,7 +710,73 @@ class AdminView:
                             page_start_warning: gr.update(visible=True),
                         }
 
+                # def create_bibliotheque(collection_name):
+                #     list_documents= [item['doc'] for item in ctrl.retriever.collection.get()['metadatas']]
+                    
+                    
+                    def create_folder_fctn(docs, folder_name): 
+                        Dict_of_folders["Name"].append(folder_name)
+                        Dict_of_folders["Files"].append(docs)
+                        with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/view/dict_of_folders.json', 'w') as file:
+                            json.dump(Dict_of_folders, file)
 
+                        gr.Info("Folder created")
+                        
+                        return{
+                        Folders_list: gr.update(choices=[folder for folder in Dict_of_folders["Name"]],label="Folder list", interactive=True)
+                        }
+                    def delete_folder_fctn(Folders_list_): 
+                        folder_name = Folders_list_
+                        Dict_of_folders["Files"].remove([files for name, files in zip(Dict_of_folders["Name"], Dict_of_folders["Files"]) if name == folder_name][0])
+                        Dict_of_folders["Name"].remove(folder_name)
+                        with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/view/dict_of_folders.json', 'w') as file:
+                            json.dump(Dict_of_folders, file)
+
+                        gr.Info("Folder deleted")
+                        
+                        return{
+                        Folders_list: gr.update(choices=[folder for folder in Dict_of_folders["Name"]],label="Folder list", interactive=True)
+                        }
+
+                    def delete_file_in_folder_fctn(folder_name, doc_name):
+                        with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/view/dict_of_folders.json', 'r') as file:
+                            Dict_of_folders = json.load(file)
+                            print("Loaded dict_of_folders:", Dict_of_folders)
+
+                        if folder_name in Dict_of_folders["Name"]:
+                            folder_index = Dict_of_folders["Name"].index(folder_name)
+                            print("Found folder_index:", folder_index)
+                            
+                            if doc_name[0] in Dict_of_folders["Files"][folder_index]:
+                                
+                                Dict_of_folders["Files"][folder_index].remove(doc_name[0])
+                                print("Removed doc_name:", doc_name)
+                                with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/view/dict_of_folders.json', 'w') as file:
+                                    json.dump(Dict_of_folders, file)
+                                    print("Updated dict_of_folders:", Dict_of_folders)
+                                gr.Info("Document deleted")
+                                return {
+                                    Documents_in_folder: gr.update(
+                                        choices=Dict_of_folders["Files"][folder_index]
+                                    )
+                                }
+                            else:
+                                return "Document not found in the specified folder"
+                        else:
+                            return "Folder not found"   
+                        
+                    def update_documents_in_folder(folder_name):
+                        files_for_folder = [files for name, files in zip(Dict_of_folders["Name"], Dict_of_folders["Files"]) if name == folder_name][0]
+                        print("update doc started")
+                        return{
+                        Documents_in_folder:gr.update(
+                            choices=files_for_folder,
+                            label="Files in the selected folder",
+                            interactive=True
+                        ) 
+                        }
+                        
+                    Folders_list.input(update_documents_in_folder, inputs=[Folders_list], outputs=[Documents_in_folder])      
                     upload_another_doc_btn.click(input_file_clear,
                                     inputs=None,
                                     outputs=[collections_list, page_start_warning, actual_page_start, input_doc_comp, input_text_comp, input_example_comp, clear_btn, include_images_btn, histo_text_comp, delete_database_btn,upload_another_doc_btn, source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3]])
@@ -697,6 +793,7 @@ class AdminView:
                     collections_list.input(change_collection,
                                     inputs=[collections_list],
                                     outputs=[actual_page_start, page_start_warning, collections_list, input_text_comp, input_example_comp, clear_btn, include_images_btn, histo_text_comp, input_doc_comp, delete_database_btn,upload_another_doc_btn,metadata_docs_update])
+
 
                     input_doc_comp \
                         .upload(input_doc_fn,
@@ -734,7 +831,10 @@ class AdminView:
                     clear_btn.click(clear_fn,
                                     inputs=None,
                                     outputs=[input_text_comp, histo_text_comp, input_example_comp,upload_another_doc_btn,
-                                            source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3]]) 
+                                            source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3]])
+                    Folder_button.click(create_folder_fctn , inputs=[metadata_docs_update,folder_name_input], outputs = [Folders_list])
+                    delete_folder_button.click(delete_folder_fctn , inputs=[Folders_list], outputs = [Folders_list])
+                    delete_file_in_folder_button.click(delete_file_in_folder_fctn , inputs=[Folders_list,Documents_in_folder], outputs = [Documents_in_folder])
                 with gr.Tab("Activity Over Time"):
                     with gr.Row():
                         with gr.Column():
@@ -813,5 +913,3 @@ class AdminView:
         return qna
 
     
-    
- 

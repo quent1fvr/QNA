@@ -21,7 +21,7 @@ def group_formats(formats : list) -> list:
     current_group = []
     current_format = formats[0]
     for format in formats:
-        if format - current_format <= 0.20:
+        if format - current_format <= 2:
             current_group.append(format)
         else:
             groups.append(current_group)

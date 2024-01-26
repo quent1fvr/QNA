@@ -16,8 +16,7 @@ class Chatbot:
         self.retriever = retriever
         self.client_db = client_db
 
-    def get_response(self, query, histo):
-        
+    def get_response(self, query, histo, folder, doc_or_folder , documents):
         timestart = time.time()
         histo_conversation, histo_queries = self._get_histo(histo)
         # language_of_query = self.llm.detect_language_v2(query).lower()
@@ -29,7 +28,7 @@ class Chatbot:
         
         # block_sources = self.retriever.similarity_search(queries=queries)
         language_of_query = "en"
-        block_sources = self.retriever.similarity_search(queries=query)
+        block_sources = self.retriever.similarity_search(queries=query , folder = folder ,  document_or_folder = doc_or_folder , documents = documents)
         block_sources = self._select_best_sources(block_sources)
         sources_contents = [f"Paragraph title : {s.title}\n-----\n{s.content}" if s.title else f"Paragraph {s.index}\n-----\n{s.content}" for s in block_sources]
         context = '\n'.join(sources_contents)
@@ -119,9 +118,6 @@ class Chatbot:
                 gr.Info("Please wait while your document is being analysed")
                 print("Database is empty")
                 doc = Doc(path=input_doc.name,include_images=include_images_,actual_first_page=actual_page_start)
-
-                # for block in doc.blocks:  #DEBUG PART
-                #     print(f"{block.index} : {block.content}")
 
                 retriever = Retriever(doc.container, collection=collection,llmagent=self.llm)
             else:

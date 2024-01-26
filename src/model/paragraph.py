@@ -29,14 +29,7 @@ class Paragraph:
             self.text = "\n\nTable :\n" + self.text + "\n\n"
         return self
     
-    # def handle_levels(self, font_style : str):
-    #     if len(font_style) != 5 and 'title' in font_style:
-    #         return int(font_style[-1])
-    #     elif len(font_style) == 2 and font_style[0] == 'h':
-    #         return int(font_style[-1])
-    #     else:
-    #         return INFINITE
-        
+
     def handle_levels(self, font_style: str):
         # Word-specific style parsing
         if font_style.startswith('Heading '):

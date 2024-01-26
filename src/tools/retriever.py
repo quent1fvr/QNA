@@ -112,7 +112,7 @@ class Retriever:
 
                 self.collection.add(
                     documents=[level_summary],
-                    ids=["doc_title", level_summary_id],
+                    ids=[ level_summary_id],
                     metadatas=[combined_block.to_dict()]
                 )
                  # List of dictionaries, each representing a block
@@ -177,7 +177,7 @@ class Retriever:
 
 
 
-    def similarity_search(self, queries: str) -> {}:
+    def similarity_search(self, queries: str, folder, document_or_folder, documents) -> {}:
         """
         Performs a similarity search in the collection based on given queries.
 
@@ -188,18 +188,68 @@ class Retriever:
             A list of Block objects that are similar to the given queries.
         """
         # Query the collection and retrieve blocks based on similarity.
-        res = self.collection.query(query_texts=queries, n_results=5)
-        block_dict_sources = res['metadatas'][0]
-        distances = res['distances'][0]
-        blocks = []
-        for bd, d in zip(block_dict_sources, distances):
-            b = Block().from_dict(bd)
-            b.distance = d
-            blocks.append(b)
+        import json
+        if document_or_folder == "Folder":
+            try:
+                with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/view/dict_of_folders.json', 'r') as file:
+                    Dict_of_folders = json.load(file)
+                print(folder)
+                files_for_folder = [files for name, files in zip(Dict_of_folders["Name"], Dict_of_folders["Files"]) if name == folder[0]]
+                print(files_for_folder[0])
+                if files_for_folder:
+                    condition = {
+                        "doc": {
+                            "$in": files_for_folder[0]  # Assuming you want to use the files of the first matching folder
+                        }
+                    }
+                    res = self.collection.query(query_texts=queries, n_results=3, where=condition)
+                else:
+                    res = self.collection.query(query_texts=queries, n_results=3)
+                
+                block_dict_sources = res['metadatas'][0]
+                distances = res['distances'][0]
+                print(distances)
+                
+                blocks = []
+                for bd, d in zip(block_dict_sources, distances):
+                    b = Block().from_dict(bd)
+                    b.distance = d
+                    blocks.append(b)
+                    
+                return blocks
             
-        return blocks
-
-    
+            except FileNotFoundError:
+                res = self.collection.query(query_texts=queries, n_results=3)
+                block_dict_sources = res['metadatas'][0]
+                distances = res['distances'][0]
+                print(distances)
+                
+                blocks = []
+                for bd, d in zip(block_dict_sources, distances):
+                    b = Block().from_dict(bd)
+                    b.distance = d
+                    blocks.append(b)
+                    
+                return blocks
+        else:
+            condition = {
+                "doc": {
+                    "$in": documents  # Assuming you want to use the files of the first matching folder
+                }
+            }
+            res = self.collection.query(query_texts=queries, n_results=3, where = condition)
+            block_dict_sources = res['metadatas'][0]
+            distances = res['distances'][0]
+            print(distances)
+            
+            blocks = []
+            for bd, d in zip(block_dict_sources, distances):
+                b = Block().from_dict(bd)
+                b.distance = d
+                blocks.append(b)
+                
+            return blocks
+        
 ######################      LEGACY RETRIEVER    ########################       
 
 # class Retriever:

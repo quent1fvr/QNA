@@ -89,7 +89,7 @@ class Reader:
     # Extracting tables from the page
     def extract_table(self, pdf_path, page_num, table_num):
         # Open the pdf file
-        pdf = pdfplumber.open(pdf_path)
+        pdf = pdfp.open(pdf_path)
         # Find the examined page
         table_page = pdf.pages[page_num]
         # Extract the appropriate table
@@ -310,10 +310,9 @@ class Reader:
                     actual_format = "table"
                 else:
                     actual_format = "content"
-                #try to find the good format if the current result seems wrong
-                #changes depending on the document
                 if len(page[4][j]) > 150 and "title" in actual_format:
                     actual_format = "content"
+                print(actual_format)
                 paragraph = Paragraph(text=page[4][j],font_style=actual_format,id_=j,page_id=index)
                 paragraphs.append(paragraph)
                 j+=1
@@ -357,19 +356,7 @@ class Reader:
             i+=1
         return concatenated_paragraphs
     
-    # def analyze_font_sizes(self, pdf_path):
-    #     font_sizes = []
-    #     with pdfplumber.open(pdf_path) as pdf:
-    #         for page in pdf.pages:
-    #             text = page.extract_text()
-    #             if text:
-    #                 for char in page.chars:
-    #                     if isinstance(char, dict) and 'size' in char:
-    #                         font_sizes.append(char['size'])
-    #     mean_size = statistics.mean(font_sizes)
-    #     std_dev = statistics.stdev(font_sizes)
-    #     return mean_size, std_dev
-    
+
     def rearrange_paragraphs(self, paragraphs : [Paragraph]):
         #associate paragraphs with the same font style
         i = 0
@@ -379,6 +366,10 @@ class Reader:
         return paragraphs
 
 
+    
+    
+    
+    
     
     
 class Reader_illumio:
