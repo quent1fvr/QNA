@@ -13,7 +13,7 @@ theme = gr.themes.Soft(
     neutral_hue="stone",
 )
 def run(ctrl: Chatbot, config: {}):
-    with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/view/dict_of_folders.json', 'r') as file:
+    with open('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/ressources/dict_of_folders.json', 'r') as file:
         Dict_of_folders = json.load(file)
         open_ai_embedding = embedding_functions.OpenAIEmbeddingFunction(api_key=os.environ['OPENAI_API_KEY'],model_name="text-embedding-ada-002")
 
@@ -23,7 +23,7 @@ def run(ctrl: Chatbot, config: {}):
         with gr.Row():
             with gr.Column(scale=1, elem_id="margin-top-row"):
                 
-                expert_mode = gr.Checkbox(label="Expert mode", value=False, interactive=True)
+                expert_mode = gr.Checkbox(label="Expert mode", value=False, interactive=True,)
 
                 collections_listB = gr.Dropdown(
                     choices=[a.name for a in ctrl.client_db.list_collections()],
@@ -47,7 +47,7 @@ def run(ctrl: Chatbot, config: {}):
                     label="Documents in the collection", interactive = True, visible=False
                 )
                 
-                documents_or_folder = gr.Radio(choices=["Documents","Folder"],label="Documents or Folder",visible= True,interactive=True)
+                documents_or_folder = gr.Radio(choices=["Documents","Folder"],label="Documents or Folder",visible= False,interactive=True)
                 
                 
                 Folders_list = gr.CheckboxGroup(
@@ -83,7 +83,7 @@ def run(ctrl: Chatbot, config: {}):
                 )
 
 
-                clear_btn = gr.Button("Clear Chat", visible=False)
+                clear_btn = gr.Button("Clear Chat", visible=True)
                 positive_button = gr.Button("👍", visible=False)
                 negative_button = gr.Button("👎", visible=False)
                 feedback_input = gr.Textbox(interactive=True, label=" Manual Feedback")   
@@ -225,7 +225,7 @@ def run(ctrl: Chatbot, config: {}):
             update_ = {
                 input_text_comp: gr.update(value=''),
                 histo_text_comp: gr.update(value='', visible=False),
-                input_example_comp: gr.update(value='', visible=True),
+                input_example_comp: gr.update(value='', visible=False),
                 intro_text: gr.update(visible=False),
 
             }
@@ -322,13 +322,13 @@ def run(ctrl: Chatbot, config: {}):
                 return {
                     Folders_list: gr.update(visible=False),
                     Documents_in_folder: gr.update(visible=False),
-                        List_documents: gr.update(visible=True)
+                    List_documents: gr.update(visible=True)
                 }
             else:
                 return {
                     Folders_list: gr.update(visible=True),
                     Documents_in_folder: gr.update(visible=True),
-                    List_documents: gr.update(visible=True)
+                    List_documents: gr.update(visible=False)
 
                 }
                 
@@ -339,8 +339,8 @@ def run(ctrl: Chatbot, config: {}):
                 update = {
                     collections_list: gr.update(visible=False), 
                     expert_mode: gr.update(visible=True),
-                    Folders_list: gr.update(visible=True),
-                    Documents_in_folder: gr.update(visible=True),
+                    Folders_list: gr.update(visible=False),
+                    Documents_in_folder: gr.update(visible=False),
                     metadata_docs_update:gr.update(visible = True), 
                     documents_or_folder: gr.update(visible=True),
                     
@@ -406,9 +406,8 @@ def run(ctrl: Chatbot, config: {}):
                            source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3]])
         clear_btn.click(clear_fn,
                         inputs=None,
-                        outputs=[input_text_comp, histo_text_comp, input_example_comp,
+                        outputs=[input_text_comp, histo_text_comp, input_example_comp,intro_text,
                                  source_text_comp[0], source_text_comp[1], source_text_comp[2], source_text_comp[3]])
-
 
 
 

@@ -3,7 +3,7 @@ from config import *
 import src.view.legacy_view as legacy_view
 import src.view.view_user as view_user
 #import src.view.view_admin as view_admin 
-from src.view.admin_view import AdminView
+from src.view.new_admin_view import GradioInterface
 from src.control.control import Chatbot
 import chromadb
 from src.tools.retriever import Retriever
@@ -29,7 +29,7 @@ logging.config.fileConfig('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/
 
  
 chat = Chatbot(client_db=client_db, llm_agent=llm_agent, retriever=Retriever(llmagent=llm_agent))
-admin_view = AdminView(ctrl=chat, config=view_config)
-ilumio_qna_admin = view_user.run(ctrl=chat, config=view_config)
+admin_view = GradioInterface(ctrl=chat, config=view_config, log_file_path="/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/Logs/generated_log.log")
+ilumio_qna_admin = admin_view.run(ctrl=chat, config=view_config)
 
 ilumio_qna_admin.queue().launch()

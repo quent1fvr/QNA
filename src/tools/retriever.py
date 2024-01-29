@@ -232,23 +232,50 @@ class Retriever:
                     
                 return blocks
         else:
-            condition = {
-                "doc": {
-                    "$in": documents  # Assuming you want to use the files of the first matching folder
+            try:
+                condition = {
+                    "doc": {
+                        "$in": documents  # Assuming you want to use the files of the first matching folder
+                    }
                 }
-            }
-            res = self.collection.query(query_texts=queries, n_results=3, where = condition)
-            block_dict_sources = res['metadatas'][0]
-            distances = res['distances'][0]
-            print(distances)
-            
-            blocks = []
-            for bd, d in zip(block_dict_sources, distances):
-                b = Block().from_dict(bd)
-                b.distance = d
-                blocks.append(b)
+                res = self.collection.query(query_texts=queries, n_results=3, where = condition)
+                block_dict_sources = res['metadatas'][0]
+                distances = res['distances'][0]
+                print(distances)
                 
-            return blocks
+                blocks = []
+                for bd, d in zip(block_dict_sources, distances):
+                    b = Block().from_dict(bd)
+                    b.distance = d
+                    blocks.append(b)
+                    
+                return blocks
+            except FileNotFoundError : 
+                res = self.collection.query(query_texts=queries, n_results=3)
+                block_dict_sources = res['metadatas'][0]
+                distances = res['distances'][0]
+                print(distances)
+                
+                blocks = []
+                for bd, d in zip(block_dict_sources, distances):
+                    b = Block().from_dict(bd)
+                    b.distance = d
+                    blocks.append(b)
+                    
+                return 
+            except ValueError : 
+                res = self.collection.query(query_texts=queries, n_results=3)
+                block_dict_sources = res['metadatas'][0]
+                distances = res['distances'][0]
+                print(distances)
+                
+                blocks = []
+                for bd, d in zip(block_dict_sources, distances):
+                    b = Block().from_dict(bd)
+                    b.distance = d
+                    blocks.append(b)        
+                return blocks        
+
         
 ######################      LEGACY RETRIEVER    ########################       
 
