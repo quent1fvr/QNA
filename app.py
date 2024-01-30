@@ -11,6 +11,8 @@ from src.Llm.llm_factory import create_llm_agent  # Import the factory function
 from config import use_open_source_generation
 import logging
 import logging.config
+import streamlit as st
+from src.view.admin_view_streamlit import streamlit_layout
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
@@ -26,10 +28,7 @@ if not os.path.exists("database_demo/"):
 client_db = chromadb.PersistentClient("database_demo/")
 
 logging.config.fileConfig('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/Logs/logging_config.ini')
-
+#client_db.create_collection("tet")
  
 chat = Chatbot(client_db=client_db, llm_agent=llm_agent, retriever=Retriever(llmagent=llm_agent))
-admin_view = GradioInterface(ctrl=chat, config=view_config, log_file_path="/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/Logs/generated_log.log")
-ilumio_qna_admin = admin_view.run(ctrl=chat, config=view_config)
-
-ilumio_qna_admin.queue().launch()
+streamlit_layout(chat)
