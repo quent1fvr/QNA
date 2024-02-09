@@ -12,7 +12,6 @@ from config import use_open_source_generation
 import logging
 import logging.config
 import streamlit as st
-from src.view.admin_view_streamlit import streamlit_layout
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 
@@ -30,5 +29,4 @@ client_db = chromadb.PersistentClient("database_demo/")
 logging.config.fileConfig('/Users/quent1/Documents/Hexamind/ILLUMIO/Illumio3011/Chatbot_llama2_questions/src/Logs/logging_config.ini')
 #client_db.create_collection("tet")
  
-chat = Chatbot(client_db=client_db, llm_agent=llm_agent, retriever=Retriever(llmagent=llm_agent))
-streamlit_layout(chat)
+chat = Chatbot(client_db=client_db, llm_agent=llm_agent, retriever=Retriever(llmagent=llm_agent)) # type: ignore

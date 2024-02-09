@@ -36,6 +36,10 @@ class Chatbot:
         while (len(context) + len(histo_conversation) > 15000) and i < len(sources_contents):
             context = "\n".join(sources_contents[:-i])
             i += 1
+        print( "Query: ", query)
+        print("Histo: ", histo_conversation)
+        print("Context: ", context)
+        print("Language: ", language_of_query)
         answer = self.llm.generate_paragraph_v2(query=query, histo=histo_conversation, context=context, language=language_of_query)   
         answer = self._clean_chatgpt_answer(answer)
         timeend  = time.time()
